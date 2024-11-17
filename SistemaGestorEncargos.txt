@@ -1,0 +1,166 @@
+-- Creación de la base de datos
+CREATE DATABASE SistemaGestorEncargos;
+USE SistemaGestorEncargos;
+
+-- Creación de la tabla cliente
+CREATE TABLE cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    razonSocial VARCHAR(255),
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    telefono VARCHAR(15),
+    direccion VARCHAR(255),
+    fechaRegistro DATE NOT NULL,
+    tipoCliente ENUM('persona', 'empresa') NOT NULL,
+    estado ENUM('activo', 'inactivo') NOT NULL
+);
+
+-- Creación de la tabla usuario
+CREATE TABLE usuario (
+    idUsuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    contraseña VARCHAR(255) NOT NULL,
+    correo VARCHAR(100) NOT NULL UNIQUE,
+    rol ENUM('administrador', 'contador', 'abogado') NOT NULL,
+    fechaCreacion DATE NOT NULL,
+    estado ENUM('activo', 'inactivo') NOT NULL
+);
+
+-- Creación de la tabla encargo
+CREATE TABLE encargo (
+    idEncargo INT AUTO_INCREMENT PRIMARY KEY,
+    descripcion TEXT NOT NULL,
+    fechaInicio DATE NOT NULL,
+    fechaFin DATE NOT NULL,
+    estado ENUM('pendiente', 'en revisión', 'finalizado', 'archivado') NOT NULL,
+    idCliente INT,
+    idUsuario INT,
+    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente) ON DELETE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario)
+);
+
+-- Creación de la tabla reporte
+CREATE TABLE reporte (
+    idReporte INT AUTO_INCREMENT PRIMARY KEY,
+    fechaReporte DATE NOT NULL,
+    formato ENUM('PDF', 'DOC', 'XLS') NOT NULL,
+    rutaReporte VARCHAR(255) NOT NULL,
+    idEncargo INT,
+    FOREIGN KEY (idEncargo) REFERENCES encargo(idEncargo) ON DELETE CASCADE
+);
+
+-- Creación de la tabla tipoDocumento
+CREATE TABLE tipoDocumento (
+    idTipoDoc INT AUTO_INCREMENT PRIMARY KEY,
+    tipoDoc VARCHAR(100) NOT NULL
+);
+
+-- Creación de la tabla documento
+CREATE TABLE documento (
+    idDocumento INT AUTO_INCREMENT PRIMARY KEY,
+    nombreDocumento VARCHAR(255) NOT NULL,
+    fechaSubida DATE NOT NULL,
+    rutaArchivo VARCHAR(255) NOT NULL,
+    estado ENUM('pendiente', 'en revisión', 'finalizado', 'archivado') NOT NULL,
+    idEncargo INT,
+    idTipoDoc INT,
+    FOREIGN KEY (idEncargo) REFERENCES encargo(idEncargo) ON DELETE CASCADE,
+    FOREIGN KEY (idTipoDoc) REFERENCES tipoDocumento(idTipoDoc) ON DELETE CASCADE  -- Cambiado a ON DELETE CASCADE
+);
+
+-- Creación de la tabla historialModificaciones
+CREATE TABLE historialModificaciones (
+    idHistorial INT AUTO_INCREMENT PRIMARY KEY,
+    fechaModificacion DATE NOT NULL,
+    descripcion TEXT NOT NULL,
+    idDocumento INT,
+    idUsuario INT,
+    FOREIGN KEY (idDocumento) REFERENCES documento(idDocumento) ON DELETE CASCADE,
+    FOREIGN KEY (idUsuario) REFERENCES usuario(idUsuario)
+);
+
+-- Inserciones en la tabla cliente
+INSERT INTO cliente (nombre, apellido, razonSocial, correo, telefono, direccion, fechaRegistro, tipoCliente, estado) VALUES
+('María', 'Begano', NULL, 'mbegano@gmail.com', '348754521', 'Belgrano 2888', '2024-01-15', 'persona', 'activo'),
+(NULL, NULL, 'TecnoSOL S.A.', 'productossol@tecnosol.com', '112548654', 'Tucumán 2545', '2024-02-20', 'empresa', 'activo'),
+('Carlos', 'Morales', NULL, 'carlos.morales@hotmail.com', '45878565', 'Aroboleda 875', '2024-03-10', 'persona', 'inactivo');
+
+-- Inserciones en la tabla usuario
+INSERT INTO usuario (nombre, usuario, contraseña, correo, rol, fechaCreacion, estado) VALUES
+('Andrés Sebastian', 'andresseb', 'admin123', 'andres.sebastian@gmail.com', 'administrador', '2024-01-01', 'activo'),
+('Ana Verde', 'ana.contador2', 'ana123', 'ana1875@yahoo.com', 'contador', '2024-01-02', 'activo'),
+('Luis Dardo', 'luis.abogado3', 'luis123', 'luisdardo785@hotmail.com', 'abogado', '2024-01-03', 'inactivo');
+
+-- Inserciones en la tabla encargo
+INSERT INTO encargo (descripcion, fechaInicio, fechaFin, estado, idCliente, idUsuario) VALUES
+('Asesoría legal para empresa', '2024-01-10', '2024-01-20', 'pendiente', 2, 1),
+('Revisión de contratos', '2024-02-15', '2024-02-25', 'en revisión', 1, 2),
+('Auditoría contable', '2024-03-01', '2024-03-10', 'finalizado', 1, 2);
+
+-- Inserciones en la tabla tipoDocumento
+INSERT INTO tipoDocumento (tipoDoc) VALUES
+('Contrato'),
+('Informe'),
+('Balance contable');
+
+-- Inserciones en la tabla documento
+INSERT INTO documento (nombreDocumento, fechaSubida, rutaArchivo, estado, idEncargo, idTipoDoc) VALUES
+('Contrato de servicios', '2024-01-11', '/archivos/contrato_servicios.pdf', 'pendiente', 1, 1),
+('Informe de auditoría', '2024-03-02', '/archivos/informe_auditoria.doc', 'finalizado', 3, 2),
+('Factura de servicios', '2024-01-12', '/archivos/factura_servicios.xls', 'pendiente', 1, 3);
+
+-- Inserciones en la tabla reporte
+INSERT INTO reporte (fechaReporte, formato, rutaReporte, idEncargo) VALUES
+('2024-01-15', 'PDF', '/reportes/reporte_asesoria.pdf', 1),
+('2024-02-20', 'DOC', '/reportes/reporte_revision.doc', 2),
+('2024-03-05', 'XLS', '/reportes/reporte_auditoria.xls', 3);
+
+-- Inserciones en la tabla historialModificaciones
+INSERT INTO historialModificaciones (fechaModificacion, descripcion, idDocumento, idUsuario) VALUES
+('2024-01-13', 'Se agregó el nuevo valor al contrato de servicios', 1, 1),
+('2024-02-16', 'Se modificó el informe de auditoría', 2, 2),
+('2024-03-06', 'Se modificó la factura de servicios', 3, 1);
+
+-- Consultas en la tabla cliente
+SELECT * FROM cliente;
+
+-- Consultas en la tabla usuario
+SELECT * FROM usuario;
+
+-- Consultas en la tabla encargo
+SELECT * FROM encargo;
+
+-- Consultas en la tabla tipoDocumento
+SELECT * FROM tipoDocumento;
+
+-- Consultas en la tabla documento
+SELECT * FROM documento;
+
+-- Consultas en la tabla reporte
+SELECT * FROM reporte;
+
+-- Consultas en la tabla historialModificaciones
+SELECT * FROM historialModificaciones;
+
+-- Borrado del cliente: Carlos Morales
+DELETE FROM cliente WHERE idCliente = 3;
+
+-- Borrado del usuario: Luis Dardo
+DELETE FROM usuario WHERE idUsuario = 3;
+
+-- Borrado del encargo: Revisión de contratos
+DELETE FROM encargo WHERE idEncargo = 2;
+
+-- Borrado del tipo de documento: Balance contable
+DELETE FROM tipoDocumento WHERE idTipoDoc = 3;
+
+-- Borrado del documento: Informe de auditoría
+DELETE FROM documento WHERE idDocumento = 2;
+
+-- Borrado del reporte de revisión
+DELETE FROM reporte WHERE idReporte = 2;
+
+-- Borrado del historial de modificaciones de contratos
+DELETE FROM historialModificaciones WHERE idHistorial = 1;
