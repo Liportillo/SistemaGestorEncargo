@@ -91,4 +91,4 @@ INSERT INTO tipoDocumento (tipoDoc) VALUES
 
 -- Inserciones en la tabla usuario
 INSERT INTO usuario (nombre, apellido, nombreUsuario, contraseña, correo, rol, fechaCreacion, estado) VALUES
-('Lisandro', 'Portillo', 'LISPORTILLO', 'lisportillo@gmail.com', 'casa111', 'administrador', '2024-01-01', 'activo');
+('Lisandro', 'Portillo', 'LISPORTILLO', 'casa111', 'lisportillo@gmail.com', 'administrador', '2024-01-01', 'activo');
